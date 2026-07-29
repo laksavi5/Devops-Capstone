@@ -1,33 +1,82 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK21'
+        maven 'Apache-Maven'
+    }
+
     environment {
-        SONAR_TOKEN = credentials('sonarkey')
-        SCANNER_HOME = tool 'sonar8.1'
+        IMAGE_NAME = "maven-assignment"
+        CONTAINER_NAME = "maven-app"
     }
 
     stages {
 
-        stage('Code Checkout') {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/laksavi5/SonarQube-Jenkins.git'
+                url: 'https://github.com/laksavi5/SonarQube-Jenkins.git'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Build') {
             steps {
-                withSonarQubeEnv('sonarserver') {
-                    bat """
-                    "${SCANNER_HOME}\\bin\\sonar-scanner.bat" ^
-                    -Dsonar.projectKey=demo-check ^
-                    -Dsonar.projectName="SonarQube Jenkins Demo" ^
-                    -Dsonar.projectVersion=1.0 ^
-                    -Dsonar.sources=src/main/java ^
-                    -Dsonar.login=%SONAR_TOKEN%
-                    """
-                }
+                sh 'mvn clean compile'
             }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:latest .'
+            }
+        }
+
+        stage('Remove Old Container') {
+            steps {
+                sh '''
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+                '''
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh '''
+                docker run -d \
+                --name ${CONTAINER_NAME} \
+                -p 8081:8080 \
+                ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'Pipeline failed.'
+        }
+
+        always {
+            sh 'docker images'
+            sh 'docker ps -a'
         }
     }
 }
