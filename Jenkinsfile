@@ -16,7 +16,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/laksavi5/SonarQube-Jenkins.git'
+                url: 'https://github.com/laksavi5/Devops-Capstone.git'
             }
         }
 
