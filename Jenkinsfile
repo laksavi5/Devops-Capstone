@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK21'
-        maven 'Apache-Maven'
-    }
+    jdk 'JDK21'
+    maven 'Maven3'
+}
 
     environment {
         IMAGE_NAME = "maven-assignment"
