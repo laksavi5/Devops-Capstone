@@ -13,13 +13,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                url: 'https://github.com/laksavi5/Devops-Capstone.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn clean compile'
