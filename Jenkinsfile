@@ -7,8 +7,8 @@ pipeline {
 }
 
     environment {
-        IMAGE_NAME = "maven-assignment"
-        CONTAINER_NAME = "maven-app"
+        IMAGE_NAME = "devops-project"
+        CONTAINER_NAME = "devops-app"
     }
 
     stages {
